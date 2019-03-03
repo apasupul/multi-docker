@@ -1,0 +1,23 @@
+sudo: required
+services:
+  - docker
+
+before_install:
+  - docker build -t apaspul/react-test -f ./client/Dockerfile.dev ./client/Dockerfile.dev
+
+scripts:
+  - docker run apaspul/react-test npm test -- --coverage
+
+after_success:
+  - docker build -t apasupul/multi-client ./client 
+  - docker build -t apasupul/multi-nginx ./nginx
+  - docker build -t apasupul/multi-server ./server
+  - docker build -t apasupul/multi-worker ./worker
+  # log in to to the docker cli 
+  - echo  "$DOCKER_PASSWORD" | docker login -u "$DOCKER_ID" --password-stdin 
+  #take those images and push themt o docekr hub 
+  - docker push -t apasupul/multi-client
+  - docker push -t apasupul/multi-nginx
+  - docker push -t apasupul/multi-server
+  - docker push -t apasupul/multi-worker
+
